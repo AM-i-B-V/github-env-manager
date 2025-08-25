@@ -75,3 +75,6 @@ yarn-error.log*
 # Backup files
 *.bak
 *.backup
+
+github-env-manager
+github-env-manager.exe
