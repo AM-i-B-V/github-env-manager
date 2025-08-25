@@ -41,5 +41,5 @@ template: |
 
   $CHANGES
   
-  ## Release asset
-  docker pull :$RESOLVED_VERSION
+  ## Installation command
+  docker run -itd -p 8005:8005 --restart always --name github-env-manager ghcr.io/am-i-b-v/github-env-manager:v$RESOLVED_VERSION
