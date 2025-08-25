@@ -25,7 +25,7 @@ A modern, web-based tool for managing GitHub environment variables and secrets a
 ### Docker
 
 ```
-docker run -itd -p 8005:8005 ghcr.io/am-i-b-v/github-env-manager:v0.2.0
+docker run -itd -p 8005:8005 --restart always --name github-env-manager ghcr.io/am-i-b-v/github-env-manager:v0.3.0
 ```
 Open http://localhost:8005 in browser
 
