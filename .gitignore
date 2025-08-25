@@ -17,12 +17,12 @@
 # Go workspace file
 go.work
 
-# Build artifacts
-bin/
+# Build output
+github-env-manager
 dist/
 build/
 
-# IDE files
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
@@ -42,14 +42,10 @@ Thumbs.db
 *.log
 logs/
 
-# Environment files
+# Environment variables
 .env
 .env.local
 .env.*.local
-
-# Coverage reports
-coverage.out
-coverage.html
 
 # Temporary files
 tmp/
@@ -58,23 +54,5 @@ temp/
 # Docker
 .dockerignore
 
-# Kubernetes
-*.kubeconfig
-
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
-
-# Node modules (if any frontend build tools are used)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Backup files
-*.bak
-*.backup
-
-github-env-manager
-github-env-manager.exe
+# GitHub Actions
+.github/workflows/*.tmp

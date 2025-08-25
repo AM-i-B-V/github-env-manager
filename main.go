@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	port = 8080
+	port = 8005
 	host = "localhost"
 )
 
@@ -34,7 +34,7 @@ func main() {
 		},
 	}
 
-	rootCmd.Flags().IntVarP(&port, "port", "p", 8080, "Port to run the server on")
+	rootCmd.Flags().IntVarP(&port, "port", "p", 8005, "Port to run the server on")
 	rootCmd.Flags().StringVarP(&host, "host", "H", "localhost", "Host to bind the server to")
 
 	if err := rootCmd.Execute(); err != nil {
