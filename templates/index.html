@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/static/css/style.css" rel="stylesheet">
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-blue-50/30 min-h-screen">
+    <!-- Enhanced Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/60 shadow-sm">
+        <div class="max-w-9xl mx-auto px-6 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-lg">
+                            GH
+                        </div>
+                        <div>
+                            <h1
+                                class="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                                GitHub Environment Manager
+                            </h1>
+                            <p class="text-xs text-slate-500 font-medium">Manage variables, secrets & environments</p>
+                        </div>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2">
+                        <span
+                            class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700">
+                            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
+                            Beta
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div id="userInfo"
+                        class="hidden flex items-center gap-3 bg-slate-50 rounded-2xl px-4 py-2 border border-slate-200">
+                        <img id="userAvatar" class="h-8 w-8 rounded-full ring-2 ring-white shadow-sm" src=""
+                            alt="avatar">
+                        <div class="hidden sm:block">
+                            <span id="userName" class="text-sm font-medium text-slate-900"></span>
+                        </div>
+                        <button id="logoutBtn"
+                            class="text-slate-500 hover:text-red-600 transition-colors p-1.5 rounded-lg hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt text-sm"></i>
+                        </button>
+                    </div>
+                    <button id="authBtn"
+                        class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95">
+                        <i class="fab fa-github mr-2"></i>
+                        Connect with Token
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-9xl mx-auto px-6 py-6">
+        <!-- Enhanced Context Cards -->
+        <div class="mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <!-- Repository Card -->
+                <div
+                    class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fab fa-github text-slate-400 text-sm"></i>
+                                <span
+                                    class="text-xs font-medium text-slate-500 uppercase tracking-wide">Repository</span>
+                            </div>
+                            <div id="repoContext" class="text-base font-semibold text-slate-900 mb-1">
+                                Select a repository
+                            </div>
+                            <a id="repoUrl" href="#" target="_blank"
+                                class="text-xs text-blue-600 hover:text-blue-700 transition-colors hidden inline-flex items-center gap-1">
+                                <span>https://github.com/</span>
+                                <i class="fas fa-external-link-alt text-xs"></i>
+                            </a>
+                        </div>
+                        <div
+                            class="h-10 w-10 rounded-xl bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                            <i class="fas fa-code-branch text-green-600 text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Environments Card -->
+                <div
+                    class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-server text-slate-400 text-sm"></i>
+                                <span
+                                    class="text-xs font-medium text-slate-500 uppercase tracking-wide">Environments</span>
+                            </div>
+                            <div id="envContext" class="text-base font-semibold text-slate-900">
+                                Select environments
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">
+                                For comparison & management
+                            </div>
+                        </div>
+                        <div
+                            class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+                            <i class="fas fa-layers text-blue-600 text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Card -->
+                <div
+                    class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-chart-line text-slate-400 text-sm"></i>
+                                <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Quick
+                                    Stats</span>
+                            </div>
+                            <div id="statsContent" class="text-base font-semibold text-slate-900">
+                                No data
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">
+                                Variables & secrets count
+                            </div>
+                        </div>
+                        <div
+                            class="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                            <i class="fas fa-key text-purple-600 text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div
+                    class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-bolt text-slate-400 text-sm"></i>
+                                <span class="text-xs font-medium text-slate-500 uppercase tracking-wide">Quick
+                                    Actions</span>
+                            </div>
+                            <div class="text-base font-semibold text-slate-900">
+                                <div class="space-y-2">
+                                    <button onclick="app.selectAllEnvironments()"
+                                        class="w-full text-left px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors text-sm">
+                                        <i class="fas fa-check-double mr-2"></i>Select All Environments
+                                    </button>
+                                    <button onclick="app.refreshMeta()"
+                                        class="w-full text-left px-3 py-2 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors text-sm">
+                                        <i class="fas fa-sync-alt mr-2"></i>Refresh Data
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-2">
+                                Common actions
+                            </div>
+                        </div>
+                        <div
+                            class="h-10 w-10 rounded-xl bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center">
+                            <i class="fas fa-bolt text-yellow-600 text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="mainContent" class="hidden space-y-8">
+            <!-- Environment Comparison Section -->
+            <section class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <div class="xl:col-span-3">
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <!-- Section Header -->
+                        <div class="border-b border-slate-100 pb-4 mb-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                        <i class="fas fa-database text-blue-600"></i>
+                                        Environment Variables & Secrets
+                                    </h2>
+                                    <p class="text-sm text-slate-500 mt-1">Compare and manage across environments</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button id="refreshBtn"
+                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all">
+                                        <i class="fas fa-sync-alt text-xs"></i>
+                                        Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Environment Selection -->
+                        <div class="mb-8">
+                            <div class="mb-4 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-base font-semibold text-slate-800 mb-2">Select Environments</h3>
+                                    <p class="text-sm text-slate-600">Choose environments to compare variables and
+                                        secrets across your deployment pipeline</p>
+                                </div>
+                                <button id="createEnvBtn"
+                                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors">
+                                    <i class="fas fa-plus text-sm"></i>
+                                    Create Environment
+                                </button>
+                            </div>
+                            <div id="envPicker" class="space-y-4">
+                                <!-- Environment checkboxes will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Comparison Table -->
+                        <div class="bg-slate-50 rounded-xl p-1">
+                            <div id="compareTable"
+                                class="bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                <!-- Table will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="xl:col-span-1 space-y-6">
+                    <!-- Add New Key Panel -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="border-b border-slate-100 p-6 pb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fas fa-plus-circle text-green-600"></i>
+                                Add New Variable/Secret
+                            </h3>
+                            <p class="text-sm text-slate-500 mt-1">Create new environment variables or secrets</p>
+                        </div>
+                        <div class="p-6 pt-4">
+                            <form id="addKeyForm" class="space-y-4">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Variable
+                                            Name</label>
+                                        <input type="text" id="newKey" placeholder="e.g., DATABASE_URL, API_KEY"
+                                            class="w-full rounded-xl border-slate-300 px-4 py-3 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Type</label>
+                                        <select id="newKeyType"
+                                            class="w-full rounded-xl border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                            <option value="variable">🔧 Variable</option>
+                                            <option value="secret">🔒 Secret</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-2">Value</label>
+                                        <input type="text" id="newKeyValue" placeholder="Enter the value"
+                                            class="w-full rounded-xl border-slate-300 px-4 py-3 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Target
+                                        Environments</label>
+                                    <p class="text-xs text-slate-500 mb-3">Select which environments to add this
+                                        variable or secret to</p>
+                                    <div id="targetEnvs" class="space-y-3">
+                                        <!-- Target environment checkboxes will be populated here -->
+                                    </div>
+                                </div>
+                                <button type="submit"
+                                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95">
+                                    <i class="fas fa-plus text-xs"></i>
+                                    Add Variable/Secret
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Export & Import Panel -->
+                    <div
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div class="border-b border-slate-100 p-6 pb-4">
+                            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fas fa-exchange-alt text-blue-600"></i>
+                                Export & Import
+                            </h3>
+                            <p class="text-sm text-slate-500 mt-1">Manage environment variables in bulk</p>
+                        </div>
+                        <div class="p-6 pt-4">
+                            <div class="space-y-6">
+                                <!-- Export Section -->
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-download text-green-600 text-xs"></i>
+                                        Export to .env file
+                                    </h4>
+                                    <p class="text-xs text-slate-500 mb-3">Download variables as .env files (secrets
+                                        excluded)</p>
+                                    <div id="exportButtons" class="flex flex-wrap gap-2">
+                                        <!-- Export buttons will be populated here -->
+                                    </div>
+                                    <div id="exportPreview" class="mt-4 hidden">
+                                        <label class="block text-xs font-medium text-slate-600 mb-2">Preview</label>
+                                        <textarea id="exportText" readonly
+                                            class="h-32 w-full resize-none rounded-xl border-slate-300 bg-slate-50 p-3 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-200"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-slate-100 pt-6">
+                                    <!-- Import Section -->
+                                    <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-upload text-blue-600 text-xs"></i>
+                                        Import from .env file
+                                    </h4>
+                                    <p class="text-xs text-slate-500 mb-4">Upload variables to selected environments</p>
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-2">Choose .env
+                                                file</label>
+                                            <input type="file" id="importFile" accept=".env,text/plain"
+                                                class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-2">Or paste .env
+                                                content</label>
+                                            <textarea id="importText"
+                                                placeholder="DATABASE_URL=postgres://...&#10;API_KEY=your_api_key&#10;DEBUG=true"
+                                                class="h-24 w-full rounded-xl border-slate-300 bg-slate-50 p-3 font-mono text-xs text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"></textarea>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-2">Target
+                                                environments</label>
+                                            <div id="importTargets" class="space-y-3">
+                                                <!-- Import target checkboxes will be populated here -->
+                                            </div>
+                                        </div>
+                                        <div id="importPreview" class="mt-4 hidden">
+                                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                                                <div class="flex items-center justify-between mb-2">
+                                                    <label class="text-xs font-medium text-blue-800">Import
+                                                        Preview</label>
+                                                    <span
+                                                        class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                                                        <span id="importCount">0</span> variables
+                                                    </span>
+                                                </div>
+                                                <div id="importPreviewContent"
+                                                    class="bg-white rounded-lg border border-blue-200 p-3 font-mono text-xs max-h-32 overflow-auto text-slate-700">
+                                                    <!-- Import preview will be populated here -->
+                                                </div>
+                                                <div class="flex gap-2 mt-3">
+                                                    <button id="applyImportBtn"
+                                                        class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 shadow-lg transition-all">
+                                                        <i class="fas fa-check text-xs"></i>
+                                                        Apply Import
+                                                    </button>
+                                                    <button id="clearImportBtn"
+                                                        class="px-4 py-2 rounded-xl text-sm font-medium border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 transition-all">
+                                                        Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Repository Scope Section -->
+            <section>
+                <div class="mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fas fa-warehouse text-purple-600"></i>
+                                Repository-Level Management
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">Manage variables and secrets at the repository level
+                            </p>
+                        </div>
+                        <button id="repoScopeBtn"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 active:scale-95">
+                            <i class="fas fa-database text-sm"></i>
+                            Load Repository Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Repository Variables & Secrets Panel -->
+                <div id="repoScopePanel"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="border-b border-slate-100 p-6 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fas fa-cogs text-orange-600"></i>
+                            Repository Variables & Secrets
+                        </h3>
+                        <p class="text-sm text-slate-500 mt-1">GitHub Actions repository-level configuration</p>
+                    </div>
+                    <div class="p-6 pt-4">
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                            <div class="xl:col-span-1">
+                                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                    <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                        <i class="fas fa-plus text-green-600 text-xs"></i>
+                                        Add Repository Variable/Secret
+                                    </h4>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
+                                            <input type="text" id="repoNewKey" placeholder="e.g., DOCKER_REGISTRY"
+                                                class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-1">Type</label>
+                                            <select id="repoNewType"
+                                                class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                                <option value="variable">🔧 Variable</option>
+                                                <option value="secret">🔒 Secret</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-600 mb-1">Value</label>
+                                            <input type="text" id="repoNewValue" placeholder="Enter value"
+                                                class="w-full rounded-lg border-slate-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                                        </div>
+                                        <button id="addRepoKeyBtn"
+                                            class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-orange-600 to-orange-700 text-white hover:from-orange-700 hover:to-orange-800 shadow-lg transition-all">
+                                            <i class="fas fa-plus text-xs"></i>
+                                            Add to Repository
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="xl:col-span-2">
+                                <div class="bg-slate-50 rounded-xl p-1">
+                                    <div id="repoTable"
+                                        class="bg-white rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                        <!-- Repo table will be populated here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Repository Selection Section -->
+        <section id="repoPicker"
+            class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="border-b border-slate-100 p-6 pb-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fab fa-github text-slate-700"></i>
+                            Select Repository
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Choose a repository to manage its environment variables
+                        </p>
+                    </div>
+                    <button id="searchReposBtn"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 transition-all">
+                        <i class="fas fa-sync-alt text-xs"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 pt-4">
+                <div class="mb-6 relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-slate-400"></i>
+                    </div>
+                    <input type="text" id="repoSearch" placeholder="Search repositories by name or organization..."
+                        class="w-full rounded-xl border-slate-300 pl-11 pr-4 py-3 text-sm bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                </div>
+                <div id="repoList"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
+                    <!-- Repository list will be populated here -->
+                </div>
+            </div>
+        </section>
+
+
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white rounded-lg p-6">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="text-gray-700 mt-4">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Environment Modal -->
+    <div id="createEnvModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex items-center justify-between p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">Create New Environment</h3>
+                    <button class="text-gray-400 hover:text-gray-600" onclick="closeCreateEnvModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form id="createEnvForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Environment Name</label>
+                            <input type="text" id="newEnvName" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                placeholder="e.g., staging, production, testing">
+                            <p class="text-xs text-gray-500 mt-1">Use lowercase letters, numbers, and hyphens only</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+                            <textarea id="newEnvDescription" rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                placeholder="Describe the purpose of this environment"></textarea>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeCreateEnvModal()"
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">
+                                Create Environment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Token Input Modal -->
+    <div id="tokenModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex items-center justify-between p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-900">GitHub Personal Access Token</h3>
+                    <button class="text-gray-400 hover:text-gray-600" onclick="closeTokenModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-4">
+                            To use this tool, you need a GitHub Personal Access Token with the following scopes:
+                        </p>
+                        <ul class="text-sm text-gray-600 mb-4 space-y-1">
+                            <li>• <code>repo</code> - Full control of private repositories</li>
+                            <li>• <code>workflow</code> - Update GitHub Action workflows</li>
+                        </ul>
+                        <a href="https://github.com/settings/tokens/new" target="_blank"
+                            class="text-blue-600 hover:text-blue-800 text-sm underline">
+                            Create a new token →
+                        </a>
+                    </div>
+                    <form id="tokenForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Personal Access Token</label>
+                            <input type="password" id="tokenInput" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                        </div>
+                        <div class="mb-4">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" id="rememberMe"
+                                    class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm text-gray-700 leading-relaxed">Remember me (store token securely in
+                                    browser)</span>
+                            </label>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="closeTokenModal()"
+                                class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                                Connect
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Prompt Modal -->
+    <div id="promptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200">
+                <div class="flex items-center justify-between p-6 border-b border-slate-100">
+                    <h3 id="promptTitle" class="text-lg font-semibold text-gray-900"></h3>
+                    <button class="text-gray-400 hover:text-gray-600 transition-colors"
+                        onclick="app.closePromptModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="promptContent" class="mb-4">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="app.closePromptModal()"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors font-medium">
+                            Cancel
+                        </button>
+                        <button id="promptConfirmBtn"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
