@@ -17,43 +17,17 @@ A modern, web-based tool for managing GitHub environment variables and secrets a
 
 ### Prerequisites
 
-- Go 1.25.0 or higher
+- Docker
 - GitHub Personal Access Token with appropriate permissions
 
 ### Quick Start
 
-1. **Clone the repository**
+### Docker
 
-   ```bash
-   git clone https://github.com/your-username/github-env-manager.git
-   cd github-env-manager
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   go mod download
-   ```
-
-3. **Run the application**
-
-   ```bash
-   go run main.go
-   ```
-
-4. **Access the web interface**
-   - The application will automatically open your browser to `http://localhost:8005`
-   - If it doesn't open automatically, navigate to the URL manually
-
-### Docker (Alternative)
-
-```bash
-# Build the Docker image
-docker build -t github-env-manager .
-
-# Run the container
-docker run -p 8005:8005 github-env-manager
 ```
+docker run -itd -p 8005:8005 ghcr.io/am-i-b-v/github-env-manager:v0.2.0
+```
+Open http://localhost:8005 in browser
 
 ## Usage
 
@@ -63,7 +37,6 @@ docker run -p 8005:8005 github-env-manager
 2. Enter your GitHub Personal Access Token
 3. The token should have the following permissions:
    - `repo` - Full control of private repositories
-   - `admin:org` - Full control of organizations and teams
    - `workflow` - Update GitHub Action workflows
 
 ### Managing Environments
