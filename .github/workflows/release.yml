@@ -1,272 +1,44 @@
-name: Build and Release
+name: Release Docker Image
 
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to release"
-        required: true
-        default: "0.1.0"
-      release_type:
-        description: "Release type"
-        required: true
-        default: "minor"
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
 
-env:
-  GO_VERSION: "1.25"
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+  actions: read
 
 jobs:
-  version:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      tag: ${{ steps.version.outputs.tag }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            # Extract version from release tag
-            VERSION="${GITHUB_REF#refs/tags/}"
-            VERSION="${VERSION#v}"
-          fi
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
-          echo "Tag: v$VERSION"
-
-  build:
-    needs: version
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            platform: linux_amd64
-            binary_name: github-env-manager
-            archive_name: github-env-manager_linux_amd64.tar.gz
-            goos: linux
-            goarch: amd64
-          - os: ubuntu-latest
-            platform: linux_arm64
-            binary_name: github-env-manager
-            archive_name: github-env-manager_linux_arm64.tar.gz
-            goos: linux
-            goarch: arm64
-          - os: macos-latest
-            platform: darwin_amd64
-            binary_name: github-env-manager
-            archive_name: github-env-manager_darwin_amd64.tar.gz
-            goos: darwin
-            goarch: amd64
-          - os: macos-latest
-            platform: darwin_arm64
-            binary_name: github-env-manager
-            archive_name: github-env-manager_darwin_arm64.tar.gz
-            goos: darwin
-            goarch: arm64
-          - os: windows-latest
-            platform: windows_amd64
-            binary_name: github-env-manager.exe
-            archive_name: github-env-manager_windows_amd64.zip
-            goos: windows
-            goarch: amd64
+  build-and-push:
+    runs-on: blacksmith-arm
+    timeout-minutes: 15
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-          VERSION: ${{ needs.version.outputs.version }}
-        run: |
-          go build -ldflags="-s -w -X main.version=$VERSION" -o ${{ matrix.binary_name }} cmd/server/main.go
-
-      - name: Create archive
-        run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            7z a ${{ matrix.archive_name }} ${{ matrix.binary_name }}
-          else
-            tar -czf ${{ matrix.archive_name }} ${{ matrix.binary_name }}
-          fi
-
-      - name: Calculate SHA256 (Linux/macOS)
-        if: runner.os != 'Windows'
-        id: sha256-unix
-        run: |
-          SHA256=$(shasum -a 256 ${{ matrix.archive_name }} | cut -d' ' -f1)
-          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
-          echo "SHA256 for ${{ matrix.archive_name }}: $SHA256"
-
-          # Create SHA256 file
-          echo "$SHA256" > ${{ matrix.archive_name }}.sha256
-
-      - name: Calculate SHA256 (Windows)
-        if: runner.os == 'Windows'
-        id: sha256-windows
-        shell: pwsh
-        run: |
-          $SHA256 = (Get-FileHash -Algorithm SHA256 ${{ matrix.archive_name }}).Hash.ToLower()
-          echo "sha256=$SHA256" >> $env:GITHUB_OUTPUT
-          echo "SHA256 for ${{ matrix.archive_name }}: $SHA256"
-
-          # Create SHA256 file
-          $SHA256 | Out-File -FilePath "${{ matrix.archive_name }}.sha256" -Encoding ASCII
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Publish docker image
+        uses: docker/build-push-action@v6
         with:
-          name: ${{ matrix.archive_name }}
-          path: ${{ matrix.archive_name }}
+          platforms: linux/arm64,linux/amd64
+          context: .
+          push: true
+          tags: 'ghcr.io/am-i-b-v/${{ github.event.repository.name }}:${{ github.event.release.tag_name }}'
+          provenance: false
 
-      - name: Upload SHA256
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.archive_name }}.sha256
-          path: ${{ matrix.archive_name }}.sha256
-
-  update-files:
-    needs: [version, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-
-      - name: Extract SHA256 values
-        id: extract-sha256
+      - name: Output image info
         run: |
-          # Extract SHA256 values from files
-          LINUX_AMD64_SHA256=$(cat github-env-manager_linux_amd64.tar.gz.sha256)
-          LINUX_ARM64_SHA256=$(cat github-env-manager_linux_arm64.tar.gz.sha256)
-          DARWIN_AMD64_SHA256=$(cat github-env-manager_darwin_amd64.tar.gz.sha256)
-          DARWIN_ARM64_SHA256=$(cat github-env-manager_darwin_arm64.tar.gz.sha256)
-          WINDOWS_AMD64_SHA256=$(cat github-env-manager_windows_amd64.zip.sha256)
-
-          echo "linux_amd64_sha256=$LINUX_AMD64_SHA256" >> $GITHUB_OUTPUT
-          echo "linux_arm64_sha256=$LINUX_ARM64_SHA256" >> $GITHUB_OUTPUT
-          echo "darwin_amd64_sha256=$DARWIN_AMD64_SHA256" >> $GITHUB_OUTPUT
-          echo "darwin_arm64_sha256=$DARWIN_ARM64_SHA256" >> $GITHUB_OUTPUT
-          echo "windows_amd64_sha256=$WINDOWS_AMD64_SHA256" >> $GITHUB_OUTPUT
-
-      - name: Update Homebrew Formula
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          LINUX_AMD64_SHA256="${{ steps.extract-sha256.outputs.linux_amd64_sha256 }}"
-          LINUX_ARM64_SHA256="${{ steps.extract-sha256.outputs.linux_arm64_sha256 }}"
-          DARWIN_AMD64_SHA256="${{ steps.extract-sha256.outputs.darwin_amd64_sha256 }}"
-          DARWIN_ARM64_SHA256="${{ steps.extract-sha256.outputs.darwin_arm64_sha256 }}"
-
-          # Update the Homebrew formula
-          sed -i "s/version \"[^\"]*\"/version \"$VERSION\"/" Formula/github-env-manager.rb
-          sed -i "s|url \"https://github.com/AM-i-B-V/github-env-manager/releases/download/v[^\"]*|url \"https://github.com/AM-i-B-V/github-env-manager/releases/download/v$VERSION|g" Formula/github-env-manager.rb
-          sed -i "s/sha256 \"[^\"]*\"/sha256 \"$DARWIN_AMD64_SHA256\"/" Formula/github-env-manager.rb
-          sed -i "s/sha256 \"[^\"]*\"/sha256 \"$DARWIN_ARM64_SHA256\"/" Formula/github-env-manager.rb
-          sed -i "s/sha256 \"[^\"]*\"/sha256 \"$LINUX_AMD64_SHA256\"/" Formula/github-env-manager.rb
-          sed -i "s/sha256 \"[^\"]*\"/sha256 \"$LINUX_ARM64_SHA256\"/" Formula/github-env-manager.rb
-
-      - name: Update Install Scripts
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-
-          # Update install scripts to use the new version
-          sed -i "s/VERSION=\"[^\"]*\"/VERSION=\"$VERSION\"/" scripts/install.sh
-          sed -i "s/\\$Version = \"[^\"]*\"/\\$Version = \"$VERSION\"/" scripts/install.ps1
-
-      - name: Update Documentation
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-
-          # Update version references in documentation
-          sed -i "s/version \"[^\"]*\"/version \"$VERSION\"/" README.md
-          sed -i "s/version \"[^\"]*\"/version \"$VERSION\"/" INSTALL.md
-
-      - name: Commit and push changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "chore: Update version to ${{ needs.version.outputs.version }} [skip ci]" || exit 0
-          git push
-
-  upload-assets:
-    needs: [version, build, update-files]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-
-      - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./github-env-manager_linux_amd64.tar.gz
-          asset_name: github-env-manager_linux_amd64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Linux ARM64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./github-env-manager_linux_arm64.tar.gz
-          asset_name: github-env-manager_linux_arm64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload macOS AMD64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./github-env-manager_darwin_amd64.tar.gz
-          asset_name: github-env-manager_darwin_amd64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload macOS ARM64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./github-env-manager_darwin_arm64.tar.gz
-          asset_name: github-env-manager_darwin_arm64.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Windows AMD64
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./github-env-manager_windows_amd64.zip
-          asset_name: github-env-manager_windows_amd64.zip
-          asset_content_type: application/zip
+          echo "Successfully built and pushed Docker image:"
+          echo "Tags: ghcr.io/am-i-b-v/${{ github.event.repository.name }}:${{ github.event.release.tag_name }}"
