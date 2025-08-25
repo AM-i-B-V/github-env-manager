@@ -48,7 +48,7 @@ jobs:
           echo "Bump type: $BUMP_TYPE"
 
           # Get current version
-          CURRENT_VERSION=$(./scripts/version.sh version 2>/dev/null | grep "Current version:" | cut -d' ' -f3 || echo "0.0.0")
+          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
           echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
           # Calculate next version
