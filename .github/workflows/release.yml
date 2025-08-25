@@ -113,16 +113,28 @@ jobs:
             tar -czf ${{ matrix.archive_name }} ${{ matrix.binary_name }}
           fi
 
-      - name: Calculate SHA256
-        id: sha256
+      - name: Calculate SHA256 (Linux/macOS)
+        if: runner.os != 'Windows'
+        id: sha256-unix
         run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            SHA256=$(certutil -hashfile ${{ matrix.archive_name }} SHA256 | findstr /v "SHA256" | findstr /v "certutil" | tr -d ' ')
-          else
-            SHA256=$(shasum -a 256 ${{ matrix.archive_name }} | cut -d' ' -f1)
-          fi
+          SHA256=$(shasum -a 256 ${{ matrix.archive_name }} | cut -d' ' -f1)
           echo "sha256=$SHA256" >> $GITHUB_OUTPUT
           echo "SHA256 for ${{ matrix.archive_name }}: $SHA256"
+
+          # Create SHA256 file
+          echo "$SHA256" > ${{ matrix.archive_name }}.sha256
+
+      - name: Calculate SHA256 (Windows)
+        if: runner.os == 'Windows'
+        id: sha256-windows
+        shell: pwsh
+        run: |
+          $SHA256 = (Get-FileHash -Algorithm SHA256 ${{ matrix.archive_name }}).Hash.ToLower()
+          echo "sha256=$SHA256" >> $env:GITHUB_OUTPUT
+          echo "SHA256 for ${{ matrix.archive_name }}: $SHA256"
+
+          # Create SHA256 file
+          $SHA256 | Out-File -FilePath "${{ matrix.archive_name }}.sha256" -Encoding ASCII
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
