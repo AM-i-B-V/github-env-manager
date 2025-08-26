@@ -42,4 +42,6 @@ template: |
   $CHANGES
   
   ## Installation command
-  docker run -itd -p 8005:8005 --restart always --name github-env-manager ghcr.io/am-i-b-v/github-env-manager:v$RESOLVED_VERSION
+  ```bash
+  docker run -itd -p 8005:8005 --restart always --name github-env-manager amibotuser/github-env-manager:v$RESOLVED_VERSION
+  ```
