@@ -26,9 +26,16 @@ GitHub's web UI restricts environment variables/secrets editing to admin users o
 
 ### Quick Start
 
-### Docker
+#### 🚀 One-Command Installation (Recommended)
 
+```bash
+# Install and run with automatic port selection
+curl -fsSL https://raw.githubusercontent.com/AM-i-B-V/github-env-manager/main/install.sh | bash
 ```
+
+#### 🐳 Manual Docker Installation
+
+```bash
 docker run -itd -p 8005:8005 --restart always --name github-env-manager amibotuser/github-env-manager:latest
 ```
 
