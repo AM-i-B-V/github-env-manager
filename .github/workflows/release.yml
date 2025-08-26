@@ -35,8 +35,8 @@ jobs:
           context: .
           push: true
           tags: |
-            '${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.event.release.tag_name }}'
-            '${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest'
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.event.release.tag_name }}
+            ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
 
       - name: Output image info
         run: |
