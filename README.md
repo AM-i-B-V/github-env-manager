@@ -4,7 +4,7 @@ A modern, web-based tool for managing GitHub environment variables and secrets a
 
 ## Why This Tool?
 
-GitHub's web UI has a limitation: users with **write access** cannot edit environment variables and secrets through the web interface - only users with **admin access** have this capability. However, users with write access can manage these variables and secrets using the GitHub API. This tool bridges that gap by providing a user-friendly web interface that works with the GitHub API, allowing users with write permissions to manage environment variables and secrets without requiring admin access.
+GitHub's web UI restricts environment variables/secrets editing to admin users only, even though users with write access can manage them via GitHub API. This tool provides a web interface that works with the GitHub API, allowing write-access users to manage environment variables and secrets without requiring admin permissions.
 
 ## Features
 
