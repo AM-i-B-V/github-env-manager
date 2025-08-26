@@ -475,7 +475,6 @@ class GitHubEnvManager {
           </div>
           <div class="text-xs text-neutral-500 mt-1">${description}</div>
         </div>
-        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium">Pick</span>
       `;
 
       button.addEventListener("click", () => this.selectRepository(repo));
