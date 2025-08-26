@@ -2,6 +2,10 @@
 
 A modern, web-based tool for managing GitHub environment variables and secrets across multiple repositories and environments. Built with Go and featuring a beautiful, responsive UI.
 
+## Why This Tool?
+
+GitHub's web UI has a limitation: users with **write access** cannot edit environment variables and secrets through the web interface - only users with **admin access** have this capability. However, users with write access can manage these variables and secrets using the GitHub API. This tool bridges that gap by providing a user-friendly web interface that works with the GitHub API, allowing users with write permissions to manage environment variables and secrets without requiring admin access.
+
 ## Features
 
 - 🔐 **GitHub Authentication** - Secure authentication using Personal Access Tokens (PAT)
@@ -27,6 +31,7 @@ A modern, web-based tool for managing GitHub environment variables and secrets a
 ```
 docker run -itd -p 8005:8005 --restart always --name github-env-manager amibotuser/github-env-manager:latest
 ```
+
 Open http://localhost:8005 in browser
 
 ## Usage
